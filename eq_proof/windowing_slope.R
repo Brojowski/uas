@@ -1,7 +1,6 @@
-mins = 1
+mins = 2
 hz = 40
 window = mins * 60 * hz
-eqPoint = 5026
 
 windowSlope = function(T, t, start_index) {
   T_0 = T[start_index:(start_index+window)]
@@ -10,39 +9,48 @@ windowSlope = function(T, t, start_index) {
   t_bar = mean(t_0)
   sum((t_0 - t_bar) * (T_0 - T_bar)) / sum((t_0 - t_bar)^2)
 }
- 
-Log_2019_09_16_122316 <- read_csv("tiny-25.csv")
-Temp = Log_2019_09_16_122316$`4LHE Temp (ºF)`
-time = Log_2019_09_16_122316$`Time (s)`
-
-applyWindow = function(index) {
+applyWindow = function(index, time, Temp) {
   windowSlope(Temp, time, index)
 }
-applyCor = function(index) {
+applyCor = function(index, time, Temp) {
   abs(cor(time[index:(index+window)], Temp[index:(index+window)]))
 }
-applyTemp = function(index) {
+applyTemp = function(index, Temp) {
   Temp[index]
 }
-applyAvg = function(index) {
+applyAvg = function(index, time, Temp) {
   abs(mean(Temp[index:(index+window)]) - mean(Temp[(index+1):(index+window+1)]))
 }
+applyMax = function(index, time, Temp) {
+  max(Temp[index:(index+window)])
+}
+ 
+plotDataSet = function(data, t_op_start, t_off) {
+  Temp = data$Motor.Temp
+  time = data$Time
+  
+  timings = seq(t_op_start, t_off)
+  
+  # Graphs
+  par(mfrow=c(1, 3))
+  eqTemp = sapply(timings, function(index) { applyTemp(index, Temp) })
+  plot(timings, eqTemp, type = "l")
+  grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  
+  eqDeltaAvg = sapply(timings, function(index) { applyAvg(index, time, Temp) })
+  plot(timings, eqDeltaAvg, type = "l", log = "y")
+  grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  
+  eqMax =  sapply(timings, function(index) { applyMax(index, time, Temp) })
+  plot(timings, eqMax, type = "l")
+  grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  
+  #eqSlopes = sapply(timings, function(index) { applyWindow(index, time, Temp) })
+  #plot(timings, eqSlopes, type = "l")
+  #eqCor = sapply(timings, function(index) { applyCor(index, time, Temp) })
+  #plot(timings, eqCor, type = "l")
+}
 
-seconds = 30000
-sampleOffset = 3000
-timings = (0:seconds) + sampleOffset
-
-par(mfrow=c(2,1))
-eqTemp = sapply(timings, applyTemp)
-plot(timings, eqTemp, type = "l")
-#eqSlopes = sapply(timings, applyWindow)
-#plot(timings, eqSlopes, type = "l")
-#eqCor = sapply(timings, applyCor)
-#plot(timings, eqCor, type = "l")
-
-eqDeltaAvg = sapply(timings, applyAvg)
-plot(timings, eqDeltaAvg, type = "l")
-
-
-# TODO something with variance
-
+plotDataSet(read.csv("tiny-8.csv"), 1361, 21300)
+plotDataSet(read.csv("tiny-20.csv"), 3500, 50700)
+plotDataSet(read.csv("tiny-25.csv"), 3300, 61700)
