@@ -1,0 +1,15 @@
+{
+  "name": "eq_proof",
+  "version": "1.0.0",
+  "description": "Our goal is to show that once our motor reaches the steady state, the temperature that it spikes to once turned off is constant. Preliminary testing seems to indicate this.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parser": "^2.3.0",
+    "mathjs": "^6.2.1"
+  }
+}

@@ -32,18 +32,18 @@ plotDataSet = function(data, t_op_start, t_off) {
   timings = seq(t_op_start, t_off)
   
   # Graphs
-  par(mfrow=c(1, 3))
+  #par(mfrow=c(2, 2))
   eqTemp = sapply(timings, function(index) { applyTemp(index, Temp) })
   plot(timings, eqTemp, type = "l")
   grid (NULL,NULL, lty = 6, col = "cornsilk2") 
   
-  eqDeltaAvg = sapply(timings, function(index) { applyAvg(index, time, Temp) })
-  plot(timings, eqDeltaAvg, type = "l", log = "y")
-  grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  #eqDeltaAvg = sapply(timings, function(index) { applyAvg(index, time, Temp) })
+  #plot(timings, eqDeltaAvg, type = "l", log = "y")
+  #grid (NULL,NULL, lty = 6, col = "cornsilk2") 
   
-  eqMax =  sapply(timings, function(index) { applyMax(index, time, Temp) })
-  plot(timings, eqMax, type = "l")
-  grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  #eqMax =  sapply(timings, function(index) { applyMax(index, time, Temp) })
+  #plot(timings, eqMax, type = "l")
+  #grid (NULL,NULL, lty = 6, col = "cornsilk2") 
   
   #eqSlopes = sapply(timings, function(index) { applyWindow(index, time, Temp) })
   #plot(timings, eqSlopes, type = "l")
@@ -51,6 +51,8 @@ plotDataSet = function(data, t_op_start, t_off) {
   #plot(timings, eqCor, type = "l")
 }
 
-plotDataSet(read.csv("tiny-8.csv"), 1361, 21300)
-plotDataSet(read.csv("tiny-20.csv"), 3500, 50700)
-plotDataSet(read.csv("tiny-25.csv"), 3300, 61700)
+#plotDataSet(read.csv("tiny-8.csv"), 1361, 21300)
+#plotDataSet(read.csv("tiny-20.csv"), 3500, 50700)
+#plotDataSet(read.csv("tiny-25.csv"), 3300, 61700)
+plotDataSet(read.csv("tiny-eq1.csv"), 30, 1000)
+
