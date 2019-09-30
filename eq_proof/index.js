@@ -61,11 +61,34 @@ function windowAverage(sample) {
     let avg = queueSum / sampleQueue.length
     let deltaAvg = math.abs(avg - last_avg)
     last_avg = avg
-    if (deltaAvg < 1e-5 && sample['ESC (µs)'] >= 2000) {
+    if (sampleQueue.length > 60 && deltaAvg < 1e-5 && sample['ESC (µs)'] >= 2000) {
         avg_motorOn = false
     }
     
     return avg_motorOn
+}
+
+function cutoffTests() {
+    // Start Tests
+    var last1 = true
+    var last2 = true
+    for (var i = 0; i < dataPoints.length; i++) 
+    {
+        if (last1 != maxForWindow(dataPoints[i])) {
+            console.log('Max for window:', i)
+            last1 = false
+        }
+
+        if (last2 != windowAverage(dataPoints[i])) {
+            console.log('Delta Avg: ', i)
+            last2 = false
+        }
+    }
+}
+
+function coolDownTests() {
+
+
 }
 
 let files = [
@@ -84,21 +107,7 @@ fs.createReadStream(files[j])
     .on('data', (data) => dataPoints.push(data))
     .on('end', () => 
     {
-        // Start Tests
-        var last1 = true
-        var last2 = true
-        for (var i = 0; i < dataPoints.length; i++) 
-        {
-            if (last1 != maxForWindow(dataPoints[i])) {
-                console.log('Max for window:', i)
-                last1 = false
-            }
+        // cutoffTests();
 
-            if (last2 != windowAverage(dataPoints[i])) {
-                console.log('Delta Avg: ', i)
-                last2 = false
-            }
-        }
-
-        
+        coolDownTests();
     })

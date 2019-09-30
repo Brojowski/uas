@@ -2,10 +2,15 @@
     This file heats a motor up to equilibrium then turns off the motor to 
     see how high the temp spikes. It cuts off when the temp passes the 
     temp the equilibrium test cut off at.
-
-                     __
-                    /  `---.__
-      _____________/          `----._____
+    
+    Power:
+      _____________      ____________
+    _|             |____|            |___________________
+    
+    Temp:
+                     __                __
+                    /  `---.__        /  `---.__
+      _____________/          \______/          ``---.___
     _/
 
 
@@ -21,6 +26,9 @@ var sampleQueue = [];
 var queueSum = 0;
 var avg_motorOn = true;
 var last_avg = 0;
+var number_of_tests = 3;
+var currentRunNum = 0;
+var cutoffTime = 120;
 
 
 rcb.files.newLogFile({prefix: filePrefix});
@@ -37,26 +45,35 @@ function readDone(result){
     rcb.files.newLogEntry(result,readSensor);
     rcb.console.setVerbose(true);
 
+    var dataPt = {};
+    dataPt.time = result.time.displayValue;
+    dataPt.temp = result.temp4LHE.displayValue;
+    dataPt.esc = result.escA.displayValue;
+    //rcb.console.print(JSON.stringify(dataPt));
+
     if (eqRunning) {
-        var dataPt = {};
-        dataPt.time = result.time.displayValue;
-        dataPt.temp = result.temp4LHE.displayValue;
-        dataPt.esc = result.escA.displayValue;
-        //rcb.console.print(JSON.stringify(dataPt));
-
-
         if (!windowAverage(dataPt)) {
             // Cut off the motor.
             rcb.console.print("Cut off motor.");
             rcb.output.pwm("escA", 1000);
-            cutoffSample = result;
+            cutoffSample = dataPt;
             eqRunning = false;
         }
     }
 
-    if (cutoffSample) {
+    if (cutoffSample && (cutoffSample.time + cutoffTime) < dataPt.time) {
         // End test at cutoff temp
+        cutoffSample = null;
+        if (currentRunNum < number_of_tests) {
+            startTest();
+        } else {
+            rcb.wait(end, 10 * 60);
+        }
     }
+}
+
+function end() {
+    rcb.endScript();
 }
 
 rcb.console.print("Start Motor Spinning");
@@ -64,7 +81,15 @@ rcb.output.pwm("escA", 1220);
 rcb.wait(startTest, 4);
 
 function startTest() {
+    currentRunNum++;
+    rcb.console.print("Starting test #", currentRunNum);
     rcb.output.ramp("escA", 1220, 2000, 10, eqTest);
+    sampleQueue = []
+    queueSum = 0
+    avg_motorOn = true
+    eqRunning = false;
+    cutoffSample = null;
+    last_avg = 0;
 }
 
 function eqTest() {
