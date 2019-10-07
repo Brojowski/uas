@@ -24,3 +24,4 @@ Our goal is to show that once our motor reaches the steady state, the temperatur
 | tiny-3cycle-100%-part3.csv            | Tiny              |                           | 3 cycle test at 100% throttle                                                 |
 | tiny-3cycle-100%-part4.csv            | Tiny              |                           | 3 cycle test at 100% throttle                                                 |
 | tiny-3cycle-70_100-combined.csv       | Tiny              |                           | all 4 parts of the cycle tests combined, (split because batteries swapped)    |
+| tiny-30.csv                           | Tiny              | 29.25                     | Failed 3 cycle test, AC in neutral state (lack of sine wave)                  |
