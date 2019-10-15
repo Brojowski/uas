@@ -1,0 +1,43 @@
+---
+title: "Series_Parallel_Batteries"
+output: "series_parallel"
+---
+
+# AC Effect
+In the below run of the motor, the A/C was nearly constant:
+```{r}
+mean(constAc$`66NA Temp (ºF)`)
+sd(constAc$`66NA Temp (ºF)`)
+```
+
+If we say equilibrium started around 500s, the motor temperature was very constant.
+```{r}
+motorEqTemp = constAc$`Motor Temp`
+mean(motorEqTemp[500:length(motorEqTemp)])
+sd(motorEqTemp[500:length(motorEqTemp)])
+```
+
+For refernce, another test
+```{r}
+motorEqTemp = today70$`4LHE Temp (ºF)`
+mean(motorEqTemp[500:length(motorEqTemp)])
+sd(motorEqTemp[500:length(motorEqTemp)])
+```
+
+
+```{r}
+plot(constAc$Time, constAc$`Motor Temp`, type='l')
+lines(constAc$Time, constAc$`319A Temp (ºF)`)
+lines(constAc$Time, constAc$`66NA Temp (ºF)`)
+plot(constAc$Time, constAc$`Electrical Power (W)`, type='l')
+plot(today70$`Time (s)`, today70$`4LHE Temp (ºF)`, type='l')
+lines(today70$`Time (s)`, today70$`319A Temp (ºF)`)
+lines(today70$`Time (s)`, today70$`66NA Temp (ºF)`)
+plot(today70$`Time (s)`, today70$`Electrical Power (W)`, type='l')
+plot(today100$`Time (s)`, today100$`4LHE Temp (ºF)`, type='l', ylim = c(70, 105))
+lines(today100$`Time (s)`, today100$`319A Temp (ºF)`)
+lines(today100$`Time (s)`, today100$`66NA Temp (ºF)`)
+plot(today100$`Time (s)`, today100$`Electrical Power (W)`, type='l')
+```
+
+---
