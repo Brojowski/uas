@@ -15,7 +15,7 @@
 
 
 */
-
+var sustainedPwm = 2000;
 
 var filePrefix = "EqTest";
 var samplesAvg = 20;             // TODO: Figure out right sample average
@@ -30,7 +30,12 @@ var number_of_tests = 3;
 var currentRunNum = 0;
 var cutoffTime = 120;
 
+// UDP stream for analysis
+var receive_port = 55047; 
+var send_ip = "127.0.0.1"; 
+var send_port = 64126; 
 
+rcb.udp.init(receive_port, send_ip, send_port, UDPInitialized);
 rcb.files.newLogFile({prefix: filePrefix});
 readSensor();
 
@@ -49,7 +54,10 @@ function readDone(result){
     dataPt.time = result.time.displayValue;
     dataPt.temp = result.temp4LHE.displayValue;
     dataPt.esc = result.escA.displayValue;
-    //rcb.console.print(JSON.stringify(dataPt));
+    
+    // UDP Stream data
+    var buffer = rcb.udp.str2ab(JSON.stringify(dataPt));
+    rcb.udp.send(buffer);
 
     if (eqRunning) {
         if (!windowAverage(dataPt)) {
@@ -72,21 +80,24 @@ function readDone(result){
     }
 }
 
+
 function end() {
     rcb.endScript();
 }
 
-rcb.console.print("Start Motor Spinning");
-rcb.output.pwm("escA", 1220);
-rcb.wait(startTest, 4);
+function UDPInitialized(){
+    rcb.console.print("Start Motor Spinning");
+    rcb.output.pwm("escA", 1220);
+    rcb.wait(startTest, 4);
+}
 
 function startTest() {
     currentRunNum++;
     rcb.console.print("Starting test #", currentRunNum);
-    rcb.output.ramp("escA", 1220, 2000, 10, eqTest);
-    sampleQueue = []
-    queueSum = 0
-    avg_motorOn = true
+    rcb.output.ramp("escA", 1220, sustainedPwm, 10, eqTest);
+    sampleQueue = [];
+    queueSum = 0;
+    avg_motorOn = true;
     eqRunning = false;
     cutoffSample = null;
     last_avg = 0;
