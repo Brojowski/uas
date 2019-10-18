@@ -46,6 +46,8 @@ function readSensor(){
 }
 
 function readDone(result){
+    // rcb.console.print(JSON.stringify(result));
+
     rcb.console.setVerbose(false);
     rcb.files.newLogEntry(result,readSensor);
     rcb.console.setVerbose(true);
@@ -53,7 +55,13 @@ function readDone(result){
     var dataPt = {};
     dataPt.time = result.time.displayValue;
     dataPt.temp = result.temp4LHE.displayValue;
-    dataPt.esc = result.escA.displayValue;
+    dataPt.ambTemp = result.temp66NA.displayValue;
+    dataPt.escTemp = result.temp319A.displayValue;
+    dataPt.pwm = result.escA.displayValue;
+    dataPt.voltage = result.voltage.displayValue;
+    dataPt.current = result.current.displayValue;
+    dataPt.power = result.electricalPower.displayValue;
+    dataPt.rpm = result.motorOpticalSpeed.displayValue;
     
     // UDP Stream data
     var buffer = rcb.udp.str2ab(JSON.stringify(dataPt));
