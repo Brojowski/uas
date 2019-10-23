@@ -5,3 +5,4 @@
 allData.png
 cleanedData.png
 .ipynb_checkpoints/*
+__pycache__/*

@@ -25,7 +25,7 @@ applyMax = function(index, time, Temp) {
   max(Temp[index:(index+window)])
 }
  
-plotDataSet = function(Temp, time, t_op_start=window+2, t_off=length(temp)) {
+plotDataSet = function(Temp, time, t_op_start=window+2, t_off=length(Temp)) {
   timings = seq(t_op_start, t_off)
   
   # Graphs
@@ -53,4 +53,5 @@ plotDataSet = function(Temp, time, t_op_start=window+2, t_off=length(temp)) {
 #plotDataSet(read.csv("tiny-25.csv"), 3300, 61700)
 #plotDataSet(read.csv("tiny-eq1.csv"), 30, 1000)
 #plotDataSet(read.csv("tiny-30.csv"), 200, 2707)
+#plotDataSet(read.csv(("tiny-3cycle_70.csv")))
 

@@ -15,9 +15,10 @@
 
 
 */
-var sustainedPwm = 2000;
+var motor = "Mega";
+var sustainedPwm = 1700;
 
-var filePrefix = "EqTest";
+var filePrefix = "EqTest-" + motor + '-' + sustainedPwm;
 var samplesAvg = 20;             // TODO: Figure out right sample average
 
 var eqRunning = false;
@@ -138,7 +139,7 @@ function windowAverage(sample) {
     let deltaAvg = math.abs(avg - last_avg);
     last_avg = avg;
     rcb.console.print(deltaAvg);
-    if (sampleQueue.length > 60 && deltaAvg < 1e-5 && sample.esc >= 2000) {
+    if (sampleQueue.length > 60 && deltaAvg < 1e-5) {
         avg_motorOn = false;
     }
     
