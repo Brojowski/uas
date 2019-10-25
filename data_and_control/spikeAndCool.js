@@ -15,10 +15,10 @@
 
 
 */
-var motor = 'Mega';
+var motor = "KDE";
 var sustainedPwm = 1700;
 
-var filePrefix = "Spike-" + motor + '-' + sustainedPwm;
+var filePrefix = "Spike-" + motor + "-" + sustainedPwm;
 var samplesAvg = 20;             // TODO: Figure out right sample average
 
 var eqRunning = false;
