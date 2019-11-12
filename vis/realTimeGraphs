@@ -1,0 +1,3 @@
+python /c/Users/agajowsk/Documents/uas/vis/udp_rebroadcaster.py &
+python /c/Users/agajowsk/Documents/uas/vis/udp_reader.py &
+bokeh serve /c/Users/agajowsk/Documents/uas/vis/bokeh_sockets.py
