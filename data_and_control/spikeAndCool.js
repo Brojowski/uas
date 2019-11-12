@@ -16,10 +16,12 @@
 
 */
 var motor = "KDE";
-var sustainedPwm = 1700;
+var sustainedPwm = 1200;
 
 var filePrefix = "Spike-" + motor + "-" + sustainedPwm;
 var samplesAvg = 20;             // TODO: Figure out right sample average
+
+var eqThreshold = 1e-4;
 
 var eqRunning = false;
 var cutoffSample = null;
@@ -89,7 +91,7 @@ function readDone(result){
     }
     
     if (cutoffTemp != -1 && dataPt.temp < (cutoffTemp - 1)) {
-        rcb.console.print(dataPt.temp + ' < ' + cutoffTemp)
+        rcb.console.print(dataPt.temp + ' < ' + cutoffTemp);
         rcb.wait(end, 60); // Wait an extra 60 seconds after the temp reaches the cut off.
     }
 }
@@ -101,8 +103,8 @@ function end() {
 
 function UDPInitialized(){
     rcb.console.print("Start Motor Spinning");
-    rcb.output.pwm("escA", 1220);
-    rcb.wait(startTest, 4);
+    //rcb.output.pwm("escA", 1220);
+    rcb.output.ramp("escA", 1000, 1220, 10, startTest);
 }
 
 function startTest() {
@@ -144,7 +146,7 @@ function windowAverage(sample) {
     let deltaAvg = math.abs(avg - last_avg);
     last_avg = avg;
     rcb.console.print(deltaAvg);
-    if (sampleQueue.length > 60 && deltaAvg < 1e-5) {
+    if (sampleQueue.length > 60 && deltaAvg < eqThreshold) {
         avg_motorOn = false;
     }
     

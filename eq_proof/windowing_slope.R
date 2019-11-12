@@ -1,4 +1,4 @@
-mins = 2
+mins = 1
 hz = 2
 window = mins * 60 * hz
 
@@ -19,24 +19,39 @@ applyTemp = function(index, Temp) {
   Temp[index]
 }
 applyAvg = function(index, time, Temp) {
-  abs(mean(Temp[(index-window-1):index-1]) - mean(Temp[(index-window):index]))
+  abs(mean(Temp[index:(index+window)]) - mean(Temp[(index+1):(index+window+1)]))
 }
 applyMax = function(index, time, Temp) {
   max(Temp[index:(index+window)])
 }
+applyStdev = function(index, time, Temp) {
+  sd(Temp[index:(index+window)])
+}
+
+applyLine = function(index, time, Temp) {
+  abs(line(time[index:(index+window)], Temp[index:(index+window)])$coefficients[2])
+}
  
-plotDataSet = function(Temp, time, t_op_start=window+2, t_off=length(Temp)) {
+plotDataSet = function(Temp, time, t_op_start=1, t_off=(length(Temp)-window)){
   timings = seq(t_op_start, t_off)
   
   # Graphs
-  par(mfrow=c(2, 1))
+  #par(mfrow=c(3, 1))
   eqTemp = sapply(timings, function(index) { applyTemp(index, Temp) })
   plot(timings, eqTemp, type = "l")
   grid (NULL,NULL, lty = 6, col = "cornsilk2") 
   
-  eqDeltaAvg = sapply(timings, function(index) { applyAvg(index, time, Temp) })
-  plot(timings, eqDeltaAvg, type = "l", log = "y")
-  grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  eqLine = sapply(timings, function (index) { applyLine(index, time, Temp)})
+  lines(timings, (eqLine*20) + 100, type='l', ylim=range(0, .02))
+  
+  #eqDeltaAvg = sapply(timings, function(index) { applyAvg(index, time, Temp) })
+  #plot(timings, eqDeltaAvg, type = "l", log = "y")
+  #grid (NULL,NULL, lty = 6, col = "cornsilk2") 
+  
+  eqStdev = sapply(timings, function(index) { applyStdev(index, time, Temp)})
+  lines(timings, (2*eqStdev) + 98, type='l', ylim = range(0, 2))
+  grid(NULL, NULL, lty = 6, col = 'cornsilk2')
+  
   
   #eqMax =  sapply(timings, function(index) { applyMax(index, time, Temp) })
   #plot(timings, eqMax, type = "l")
@@ -55,3 +70,13 @@ plotDataSet = function(Temp, time, t_op_start=window+2, t_off=length(Temp)) {
 #plotDataSet(read.csv("tiny-30.csv"), 200, 2707)
 #plotDataSet(read.csv(("tiny-3cycle_70.csv")))
 
+smooth = function(time, temp, size) {
+  timings = 1:(length(temp))
+  
+  l = list()
+  l$temps = sapply(timings, function(start) { 
+      mean(temp[start:(start+size)])
+  })
+  l$times = time[timings]
+  l
+}
