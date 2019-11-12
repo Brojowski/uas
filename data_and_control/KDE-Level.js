@@ -2,8 +2,6 @@ var motor = "KDE";
 var sustainedPwm = 1200;
 var testLength = 5 * 60;
 
-/// TODO Change prefix
-
 var filePrefix = "PostBurnLevel-" + motor + "-" + sustainedPwm;
 var samplesAvg = 20;
 var spikeMaxTemp = -1;
@@ -26,7 +24,7 @@ function readSensor(){
 }
 
 function readDone(result){
-    // rcb.console.print(JSON.stringify(result));
+    //rcb.console.print(JSON.stringify(result));
 
     rcb.console.setVerbose(false);
     rcb.files.newLogEntry(result,readSensor);
