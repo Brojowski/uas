@@ -19,4 +19,7 @@ while True:
 
     if data != None:
         print(data)
-        requests.get(url="http://localhost:5000/udp", data=data)
+        try:
+            requests.get(url="http://localhost:5000/udp", data=data, timeout=0.0000000001)
+        except requests.exceptions.ReadTimeout: 
+            pass
