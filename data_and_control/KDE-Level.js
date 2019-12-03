@@ -1,12 +1,31 @@
+//======= User Defined Parameters =============================================
+
 var motor = "KDE";
-var sustainedPwm = 1200;
+var heatUpPwm = 1600;
+var testPwm = 1500;
 var testLength = 5 * 60;
+var safetyCutoffTemp = 115;
+var coolPwm = 1200;
+var coolToTemp = 100;
 
-var filePrefix = "PostBurnLevel-" + motor + "-" + sustainedPwm;
+//====== Program =============================================================
+
+/*
+    Test segments: 
+    - 0: Start up
+    - 1: heat up
+    - 2: cool down with low PWM
+    - 3: 
+*/
+var testSegments = 0;
+
+var filePrefix = "Start95Level-" + motor + "-" + testPwm;
 var samplesAvg = 20;
-var spikeMaxTemp = -1;
 
-var cutoff = false;
+var spikeMaxTemp = -1;
+var maxHeatTemp = safetyCutoffTemp;
+
+var testStartTime = -1;
 
 // UDP stream for analysis
 var receive_port = 55047; 
@@ -24,7 +43,7 @@ function readSensor(){
 }
 
 function readDone(result){
-    //rcb.console.print(JSON.stringify(result));
+    // rcb.console.print(JSON.stringify(result));
 
     rcb.console.setVerbose(false);
     rcb.files.newLogEntry(result,readSensor);
@@ -45,33 +64,49 @@ function readDone(result){
     var buffer = rcb.udp.str2ab(JSON.stringify(dataPt));
     rcb.udp.send(buffer);
 
-    if (dataPt.time > testLength || dataPt.temp > 130) {
-        rcb.output.pwm("escA", 1000);
-        cutoff = true;
+    switch (testSegments) {
+        case 1:
+            if (dataPt.temp > maxHeatTemp) {
+                rcb.output.pwm('escA', coolPwm);
+                testSegments++;
+            }
+            break;
+        case 2:
+            if (dataPt.temp < coolToTemp) {
+                rcb.output.pwm('escA', testPwm);
+                testStartTime = dataPt.time;
+                testSegments++;
+            }
+            break;
+        case 3:
+            if ((dataPt.time - testStartTime)  > testLength || dataPt.temp > safetyCutoffTemp) {
+                rcb.output.pwm("escA", 1000);
+                testSegments++;
+            }
+            break;
+        case 4:
+            if (dataPt.temp > spikeMaxTemp) {
+                spikeMaxTemp = dataPt.temp;
+            }
+            if (dataPt.temp < (spikeMaxTemp - 1)) {
+                rcb.endScript();
+            }
+            break;
     }
-
-    if (cutoff){
-        if (dataPt.temp > spikeMaxTemp) {
-            spikeMaxTemp = dataPt.temp;
-        }
-        if (dataPt.temp < (spikeMaxTemp - 1)) {
-            rcb.endScript();
-        }
-    }
-}
-
-function end() {
-    rcb.endScript();
 }
 
 function UDPInitialized(){
     rcb.console.print("Start Motor Spinning");
-    //rcb.output.pwm("escA", 1220);
-    rcb.output.ramp("escA", 1000, 1200, 4, startTest);
+    rcb.output.pwm("escA", coolPwm);
+    rcb.output.ramp("escA", 1000, coolPwm, 4, startTest);
 }
 
 function startTest() {
-    rcb.output.ramp("escA", 1200, sustainedPwm, 10, eqTest);
+    rcb.console.print("Starting test");
+    rcb.output.ramp("escA", coolPwm, heatUpPwm, 30, heatUp);
 }
 
-function eqTest() {}
+function heatUp() {
+    rcb.console.print("Heat up started.");
+    testSegments++;
+}

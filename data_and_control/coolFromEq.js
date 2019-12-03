@@ -31,8 +31,8 @@
 
 //=========== User Variables ==================================================
 
-var motor = "Mini";
-var sustainedPwm = 2000;
+var motor = "KDE";
+var sustainedPwm = 1400;
 var lowThrottlePwm = 1200;
 
 //=========== Program =========================================================

@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 
 def floatOrNeg1(f):
     try:
@@ -8,7 +9,7 @@ def floatOrNeg1(f):
         return -1
 
 class DataPoint:
-    def __init__(self, time, pwm, voltage, current, rpm, power, escTemp, motorTemp, ambTemp='-1.0'):
+    def __init__(self, time, pwm, torque, thrust, voltage, current, rpm, power, mechPower, motorEff, propEff, efficiency, escTemp, motorTemp, ambTemp='-1.0'):
         self.time = floatOrNeg1(time)
         self.pwm = floatOrNeg1(pwm)
         self.voltage = floatOrNeg1(voltage)
@@ -18,6 +19,12 @@ class DataPoint:
         self.escTemp = floatOrNeg1(escTemp)
         self.ambTemp = floatOrNeg1(ambTemp)
         self.motorTemp = floatOrNeg1(motorTemp)
+        self.mechPower = floatOrNeg1(mechPower)
+        self.torque = floatOrNeg1(torque)
+        self.thrust = floatOrNeg1(thrust)
+        self.motorEff = floatOrNeg1(motorEff)
+        self.propEff = floatOrNeg1(propEff)
+        self.efficiency = floatOrNeg1(efficiency)
         
     def __repr__(self):
         return self.__str__()
@@ -28,10 +35,10 @@ class DataPoint:
 def dataPointFrom(row):
     if len(row) > 17:
         # Data since the ambient temp sensor
-        return DataPoint(row[0], row[1], row[5], row[6], row[7], row[8], row[13], row[15], row[14])
+        return DataPoint(row[0], row[1], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[15], row[14])
     else:
         # Data before the ambient temp sensor
-        return DataPoint(row[0], row[1], row[5], row[6], row[7], row[8], row[13], row[14])
+        return DataPoint(row[0], row[1], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
         
 # For a CSV file, get all the rows
 def getRows(folder, dataFile):
@@ -70,3 +77,8 @@ def findSpikes(run, eqThrottle=[2000, 1700], minThrottle=1000):
             spikeIndexes.append(i)
     
     return spikeIndexes
+
+def mapPwmToColor(run):
+    colors = { 1200:'purple', 1300:'blue', 1400:'green', 1500:'grey', 1600:'orange', 1800:'red'}
+    c = colors[int(re.findall('KDE-([0-9]{4})', run.file)[0])]
+    return c
