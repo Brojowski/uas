@@ -2,7 +2,7 @@
 
 var motor = "KDE";
 var heatUpPwm = 1600;
-var testPwm = 1500;
+var testPwm = 1600;
 var testLength = 5 * 60;
 var safetyCutoffTemp = 115;
 var coolPwm = 1200;
@@ -19,7 +19,7 @@ var coolToTemp = 100;
 */
 var testSegments = 0;
 
-var filePrefix = "Start95Level-" + motor + "-" + testPwm;
+var filePrefix = "Start100Level-" + motor + "-" + testPwm;
 var samplesAvg = 20;
 
 var spikeMaxTemp = -1;

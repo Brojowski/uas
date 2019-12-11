@@ -94,9 +94,9 @@ p7.circle(x='time',y='rpm',source=source)
 
 doc.add_root(p1)
 doc.add_root(p3)
+doc.add_root(p6)
 doc.add_root(p4)
 doc.add_root(p5)
-doc.add_root(p6)
 doc.add_root(p7)
 
 thread = Thread(target=blocking_task)

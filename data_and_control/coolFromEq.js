@@ -32,24 +32,16 @@
 //=========== User Variables ==================================================
 
 var motor = "KDE";
-var sustainedPwm = 1400;
+var sustainedPwm = 1600;
 var lowThrottlePwm = 1200;
 
 //=========== Program =========================================================
 
 var filePrefix = "EqCool-" + motor + '-' + sustainedPwm;
 var samplesAvg = 20;
-var testSection = 3;
+var testSection = 0;
 
-var eqRunning = false;
 var cutoffSample = null;
-var sampleQueue = [];
-var queueSum = 0;
-var avg_motorOn = true;
-var last_avg = 0;
-var number_of_tests = 3;
-var currentRunNum = 0;
-var cutoffTime = 120;
 
 var maxSpikeTemp = -1;
 
@@ -95,16 +87,14 @@ function readDone(result){
         // Case 0. ramp up to full power to start
 
         case 1:
-            if (eqRunning) {
-                if (!windowAverage(dataPt)) {
-                    // Cut off the motor.
-                    rcb.console.print("Cut off motor.");
-                    rcb.output.pwm("escA", 1000);
-                    cutoffSample = dataPt;
-                    eqRunning = false;
-                    testSection++;
-                }
+            if (slopeEqOnSample(dataPt)) {
+                // Cut off the motor.
+                rcb.console.print("Cut off motor.");
+                rcb.output.pwm("escA", 1000);
+                cutoffSample = dataPt;
+                testSection++;
             }
+            rcb.console.print(mSum);
             break;
         
         case 2: 
@@ -114,6 +104,7 @@ function readDone(result){
             if ((maxSpikeTemp - 1) > dataPt.temp) {
                 startTest();
                 maxSpikeTemp = -1;
+                slopeEqInit();
                 testSection++;
             }
             break;
@@ -121,39 +112,37 @@ function readDone(result){
         // Case 3. ramp up to full power again
         
         case 4:
-            if (eqRunning) {
-                if (!windowAverage(dataPt)) {
-                    // Cut off the motor.
-                    rcb.console.print("Cut to low power.");
-                    rcb.output.pwm("escA", lowThrottlePwm);
-                    cutoffSample = dataPt;
+            if (slopeEqOnSample(dataPt)) {
+                // Cut off the motor.
+                rcb.console.print("Cut to low power.");
+                rcb.output.pwm("escA", lowThrottlePwm);
+                cutoffSample = dataPt;
 
-                    eqRunning = false;
-                    sampleQueue = [];
-                    queueSum = 0;
-                    avg_motorOn = true;
-                    eqRunning = false;
-                    cutoffSample = null;
-                    last_avg = 0;
+                cutoffSample = null;
 
-                    testSection++;
-                }
+                testSection++;
+                slopeEqInit();
             }
+            rcb.console.print(mSum);
             break;
 
         case 5:
-            if (!windowAverage(dataPt)) {
+            if (slopeEqOnSample(dataPt)) {
                 // Cut off the motor.
                 rcb.console.print("Cut off motor.");
                 rcb.output.pwm("escA", 1000);
                 cutoffSample = dataPt;
                 testSection++;
             }
+            rcb.console.print(mSum);
             break;
 
         case 6:
-            if (cutoffSample !== null && cutoffSample.temp > dataPt.temp) {
-                rcb.wait(end, 60);
+            if (maxSpikeTemp < dataPt.temp) {
+                maxSpikeTemp = dataPt.temp;
+            }
+            if ((maxSpikeTemp - 1) > dataPt.temp) {
+                end();
             }
             break;
     }
@@ -170,48 +159,79 @@ function UDPInitialized(){
 }
 
 function startTest() {
-    currentRunNum++;
-    rcb.console.print("Starting test #", currentRunNum);
+    slopeEqInit();
     rcb.output.ramp("escA", lowThrottlePwm, sustainedPwm, 10, eqTest);
-    sampleQueue = [];
-    queueSum = 0;
-    avg_motorOn = true;
-    eqRunning = false;
     cutoffSample = null;
-    last_avg = 0;
 }
 
 function eqTest() {
-    eqRunning = true;
     testSection++;
 }
 
-function windowAverage(sample) {
-    while (sampleQueue.length && sampleQueue[0].time < (sample.time - window)) {
-        let removed = sampleQueue.shift();
-        queueSum -= removed.temp;
+// SECTION: Slope Equilibrium Definition
+
+let windowLength = 60 * 2;
+
+let mThresh = 1/windowLength;
+let tempRange = 1;
+let mSize = math.floor( windowLength/2 );
+
+var sQueue = [];
+var mQueue = [];
+var mSum = 0;
+var seenSamples = 0;
+
+function slopeEqRange() {
+    var min = 1000;
+    var max = -1;
+
+    for (var i = 0; i < windowLength; i++) {
+        let temp = sQueue[i]['Motor Temp'];
+        if (temp < min) {
+            min = temp;
+        } else if (temp > max) {
+            max = temp;
+        }
     }
 
-    sampleQueue.push(sample);
-    queueSum += sample.temp;
-
-    // Check for rounding errors.
-    // let temps = sampleQueue.map(it => it["Motor Temp"])
-    // let diff_sum = math.abs(queueSum - math.sum(temps))
-    // let diff_avg = math.abs((queueSum/sampleQueue.length) - math.mean(temps))
-    // if ( diff_sum > 1 || diff_avg > 1 ) {
-        // console.log(queueSum, math.sum(temps))
-        // console.log((queueSum/sampleQueue.length), math.mean(temps))
-        // throw "Not same maths"
-    // }
-
-    let avg = queueSum / sampleQueue.length;
-    let deltaAvg = math.abs(avg - last_avg);
-    last_avg = avg;
-    rcb.console.print(deltaAvg);
-    if (sampleQueue.length > 60 && deltaAvg < 1e-5) {
-        avg_motorOn = false;
-    }
-    
-    return avg_motorOn;
+    return max - min;
 }
+
+function slopeEqInit() {
+    sQueue = [];
+    for (var i = 0; i < windowLength; i++) {
+        sQueue.push( { temp:0, time:0 } );
+    }
+
+    mQueue = [];
+    for (i = 0; i < mSize; i++) {
+        mQueue.push(0);
+    }
+
+    mSum = 0;
+    seenSamples = 0;
+}
+
+function slopeEqOnSample(sample) {
+    sQueue.shift();
+    let removed = mQueue.shift();
+    mSum -= removed;
+
+    sQueue.push(sample);
+    let beginning = sQueue[mSize - 1];
+    
+    var m = (sample.temp - beginning.temp) / (sample.time - beginning.time);
+    if (m === Infinity) {
+        m = Number.MAX_SAFE_INTEGER;
+    }
+
+    mQueue.push(m);
+    mSum += m;
+    seenSamples += 1;
+
+    if (seenSamples < windowLength) {
+        return false;
+    } else {
+        return (math.abs(mSum) < mThresh) && (slopeEqRange() < tempRange);
+    }
+} 
