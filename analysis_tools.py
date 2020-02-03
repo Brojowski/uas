@@ -39,7 +39,9 @@ def dataPointFrom(row):
     else:
         # Data before the ambient temp sensor
         return DataPoint(row[0], row[1], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
-        
+    
+    
+    
 # For a CSV file, get all the rows
 def getRows(folder, dataFile):
     #print(dataFile)
@@ -48,11 +50,14 @@ def getRows(folder, dataFile):
         next(data) # skip the header line
         return [dataPointFrom(row) for row in data]
 
+    
+    
 class Run:
-    def __init__(self, file, data):
+    def __init__(self, file, data, details=None):
         self.file = file
         self.data = data
         self.props = dict()
+        self.details = details
 
     def __repr__(self):
         return self.__str__()
@@ -60,10 +65,15 @@ class Run:
     def __str__(self):
         return self.file + '\n' + str(self.data) + '\n' + str(self.props)
 
-def runsFromFolder(folder):
+    
+    
+    
+def runsFromFolder(folder, filterText=''):
     # Get all the CSV files
-    dataFiles = list(filter(lambda x: 'csv' in x, os.listdir(folder)))
-    return list(map(lambda f: Run(file=f, data=getRows(folder, f)), dataFiles))
+    dataFiles = list(filter(lambda x: filterText in x, filter(lambda x: 'csv' in x, os.listdir(folder))))
+    return list(map(lambda f: Run(file=f, data=getRows(folder, f), details=runDetails(f)), dataFiles))
+
+
 
 def parseRun(folder, file):
     return Run(file, data=getRows(folder, file))
@@ -78,7 +88,43 @@ def findSpikes(run, eqThrottle=[2000, 1700], minThrottle=1000):
     
     return spikeIndexes
 
+
+
+
 def mapPwmToColor(run):
     colors = { 1200:'purple', 1300:'blue', 1400:'green', 1500:'grey', 1600:'orange', 1800:'red'}
     c = colors[int(re.findall('KDE-([0-9]{4})', run.file)[0])]
     return c
+
+
+
+
+class TestDetails:
+    def __init__(self, testName, motor, testPwm, testDate, startTime):
+        self.testName = testName
+        self.motor = motor
+        self.testPwm = testPwm
+        self.testDate = testDate
+        self.startTime = startTime
+        
+    def __str__(self):
+        return "<" + self.testName + " " + self.motor + " " + str(self.testPwm) + " " + self.testDate + " " + self.startTime + ">"
+    
+    def __repr__(self):
+        return self.__str__()
+
+    
+    
+    
+def runDetails(filename):
+    match = re.search("([^-]*)-([^-]*)-([^-]*)\_([^_\.]*)\_([^_\.]*)\.csv", filename)
+    if match != None:
+        return TestDetails(
+            match[1],
+            match[2],
+            int(match[3]),
+            match[4],
+            match[5]
+        )
+    else:
+        return None
