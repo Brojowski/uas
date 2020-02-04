@@ -1,0 +1,2 @@
+﻿Time (s),ESC (µs),Servo (µs),Torque (lbf·ft),Thrust (lbf),Voltage (V),Current (A),Motor Optical Speed (rad/s),Electrical Power (W),Mechanical Power (W),Motor Efficiency (%),Propeller Mech. Efficiency (lbf/W),Overall Efficiency (lbf/W),4LHE Temp (ºF),App message,
+300,1400,,0.08369620230723211,1.1116568945396503,18.801156183909804,3.138805220785949,358.665161286,59.013167186868124,40.69700851762839,68.96258997379228,0.027315444919203905,0.018837438279147665,74.075,,
