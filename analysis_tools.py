@@ -92,7 +92,7 @@ def findSpikes(run, eqThrottle=[2000, 1700], minThrottle=1000):
 
 
 def mapPwmToColor(run):
-    colors = { 1200:'purple', 1300:'blue', 1400:'green', 1500:'grey', 1600:'orange', 1800:'red'}
+    colors = { 1200:'purple', 1300:'blue', 1400:'green', 1500:'grey', 1600:'orange', 1800:'red', 1900:'brown', 2000:'black'}
     c = colors[int(re.findall('KDE-([0-9]{4})', run.file)[0])]
     return c
 

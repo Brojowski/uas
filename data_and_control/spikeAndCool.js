@@ -27,7 +27,7 @@
 
 //=========== User Variables ==================================================
 
-var motor = "Turn";
+var motor = "P80";
 var sustainedPwm = 1700;
 var lowThrottlePwm = 1200;
 
