@@ -11,7 +11,7 @@ _|    |___|    |___|    |___|    |___
 
 //======= User Defined Parameters =============================================
 
-var motor               = "Mega";
+var motor               = "KDE5215";
 var safetyCutoffTemp    = 115;
 var startTestTemp       = 95;
 var heatUpPwm           = 1400;
