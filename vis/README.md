@@ -4,6 +4,15 @@ This directory contains live visualization tools for real time data visualizatio
 
 The test stand has the ability to stream data in real time over UDP. Both methods use this functionality.
 
+## Installation
+
+1. Install the latest version of Python 3 from here: https://www.python.org/downloads/
+2. Open a powershell window in the `vis` directory
+3. The first time, install the packages using `pip install -r requirements.txt` (if `pip` isn't found, try `pip3`)
+4. To run the tool, type `.\realTimeGraphs.bat` and press 'Enter'. 
+5. In the output, there will be a link that looks like `http://localhost/bokeh_sockets`. Open that in your browser
+6. Leave the Powershell window open as long as you want the visualizations to be available. (They will only work with automated scripts).
+
 ## Variation 1 (Recommended)
 
 The first variation uses 3 sub programs to access and display the UDP stream. The main advantage is that it can support display to many clients at once. The components are:
