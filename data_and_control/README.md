@@ -2,6 +2,10 @@
 
  This folder contains raw data from all test runs, successful and unsuccessful as well as the RCBenchmark scripts used for testing.
 
+ ## RCBenchmark Stand Script Template
+
+ 
+
  ## RCBenchmark Scripts
 
 | Script            | Description |

@@ -17,6 +17,9 @@ def connect(sid, enviorn):
 async def handle(req):
     dataPt = await req.json()
 
+    if len(b4Window) > 1 and dataPt['time'] > b4Window[-1][0]:
+        b4Window.clear()
+
     b4Window.append( (dataPt['time'], dataPt['temp']) )
     if len(b4Window) > WAIT_TIME:
         pt = b4Window.pop(0)
