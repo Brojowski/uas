@@ -103,7 +103,10 @@ class TestDetails:
     def __init__(self, testName, motor, testPwm, testDate, startTime):
         self.testName = testName
         self.motor = motor
-        self.testPwm = testPwm
+        try:
+            self.testPwm = testPwm
+        except:
+            print()
         self.testDate = testDate
         self.startTime = startTime
         
@@ -122,7 +125,7 @@ def runDetails(filename):
         return TestDetails(
             match[1],
             match[2],
-            int(match[3]),
+            match[3],
             match[4],
             match[5]
         )
