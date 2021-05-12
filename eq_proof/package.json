@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "csv-parser": "^2.3.0",
-    "mathjs": "^6.2.1"
+    "mathjs": "^7.5.1"
   }
 }
